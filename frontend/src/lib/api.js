@@ -36,3 +36,25 @@ export function fetchMatches(limit = 50) {
 export function fetchCommentary(matchId, limit = 50) {
   return request(`/matches/${matchId}/commentary?limit=${limit}`)
 }
+
+export async function startSeed() {
+  const response = await fetch(`${API_BASE}/admin/seed`, { method: 'POST' })
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(payload.error || `Seed failed (${response.status})`)
+  }
+
+  return payload.data
+}
+
+export async function fetchSeedStatus() {
+  const response = await fetch(`${API_BASE}/admin/seed/status`)
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(payload.error || `Seed status failed (${response.status})`)
+  }
+
+  return payload.data
+}

@@ -173,6 +173,11 @@ The frontend reads `BACKEND_URL` (default `http://localhost:8000`) for the
 development proxy. For production builds, set `VITE_API_BASE` to the backend
 HTTPS URL and `VITE_WS_URL` to its `wss://.../ws` URL before `npm run build`.
 
+For the resume demo, set `SEED_ENABLED=true` and `API_URL` to the public
+backend URL. The **Run Seed Matches** button then starts the seed job inside
+the backend service; no separate paid Render worker is required. The job
+finishes after the entries in `backend/src/data/data.json` are processed.
+
 ## Known limitations
 
 - `PATCH /matches/:id/score` is not wired up yet, so scores stay at their initial values.

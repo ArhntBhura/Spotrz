@@ -3,7 +3,7 @@ import Header from './components/Header.jsx'
 import MatchCard from './components/MatchCard.jsx'
 import CommentaryPanel from './components/CommentaryPanel.jsx'
 import { useLiveSocket } from './hooks/useLiveSocket.js'
-import { apiCounter, fetchCommentary, fetchMatches } from './lib/api.js'
+import { apiCounter, fetchCommentary, fetchMatches, fetchSeedStatus, startSeed } from './lib/api.js'
 import { getMatchStatus, mergeById } from './lib/format.js'
 
 const MAX_COMMENTARY = 100
@@ -12,6 +12,7 @@ export default function App() {
   const [matches, setMatches] = useState([])
   const [matchesState, setMatchesState] = useState({ loading: true, error: null })
   const [newMatchCount, setNewMatchCount] = useState(0)
+  const [seedState, setSeedState] = useState({ status: 'idle', error: null })
 
   const [selectedId, setSelectedId] = useState(null)
   const [commentary, setCommentary] = useState([])
@@ -87,6 +88,34 @@ export default function App() {
 
   const { status, watch } = useLiveSocket({ onMessage: handleMessage, onReconnect: handleReconnect })
 
+  async function handleRunSeed() {
+    setSeedState({ status: 'starting', error: null })
+    try {
+      const nextState = await startSeed()
+      setSeedState({ status: nextState.status, error: null })
+    } catch (error) {
+      setSeedState({ status: 'failed', error: error.message })
+    }
+  }
+
+  useEffect(() => {
+    if (seedState.status !== 'running' && seedState.status !== 'starting') return undefined
+
+    const timer = setInterval(async () => {
+      try {
+        const nextState = await fetchSeedStatus()
+        setSeedState({ status: nextState.status, error: nextState.error })
+        if (nextState.status === 'completed' || nextState.status === 'failed') {
+          loadMatches()
+        }
+      } catch (error) {
+        setSeedState({ status: 'failed', error: error.message })
+      }
+    }, 2000)
+
+    return () => clearInterval(timer)
+  }, [seedState.status, loadMatches])
+
   useEffect(() => {
     loadMatches()
   }, [loadMatches])
@@ -121,6 +150,22 @@ export default function App() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8">
       <Header status={status} />
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={handleRunSeed}
+          disabled={seedState.status === 'starting' || seedState.status === 'running'}
+          className="rounded-full border-2 border-ink bg-sun px-4 py-2 text-sm font-bold shadow-hard-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {seedState.status === 'starting' || seedState.status === 'running'
+            ? 'Seeding matches...'
+            : 'Run Seed Matches'}
+        </button>
+        {seedState.status === 'completed' && (
+          <span className="text-sm font-semibold text-emerald-700">Seed completed.</span>
+        )}
+        {seedState.error && <span className="text-sm font-semibold text-live">{seedState.error}</span>}
+      </div>
 
       <main className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(340px,400px)]">
         <section aria-labelledby="matches-heading">

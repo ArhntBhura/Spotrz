@@ -33,6 +33,8 @@ DATABASE_URL=your_postgres_connection_string
 PORT=8000
 HOST=0.0.0.0
 CORS_ORIGIN=https://your-frontend.example.com
+API_URL=https://your-backend.example.com
+SEED_ENABLED=true
 ```
 
 3. Start the server:
@@ -62,6 +64,18 @@ npm run dev
 
 - `GET /matches/:id/commentary`
 - `POST /matches/:id/commentary`
+
+### Demo seeding
+
+When `SEED_ENABLED=true`, the frontend can start the demo seed job with:
+
+- `POST /admin/seed`
+- `GET /admin/seed/status`
+
+The seed job runs inside the backend service, writes to PostgreSQL, and
+broadcasts commentary and score updates to connected WebSocket clients. Set
+`API_URL` to the public backend URL because the seed job calls the backend
+through its REST API.
 
 ## WebSocket
 

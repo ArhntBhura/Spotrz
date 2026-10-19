@@ -1,5 +1,6 @@
 import "dotenv/config";
 import fs from "fs/promises";
+import { fileURLToPath } from "url";
 
 const DELAY_MS = Number.parseInt(process.env.DELAY_MS || "250", 10);
 const NEW_MATCH_DELAY_MIN_MS = 2000;
@@ -543,7 +544,7 @@ function randomMatchDelay() {
 //   }
 // }
 
-async function seed() {
+export async function runSeed() {
     console.log(`📡 Seeding via API: ${API_URL}`);
 
     const { feed, matches: seedMatches } = await loadSeedData();
@@ -665,7 +666,9 @@ async function seed() {
     }
 }
 
-seed().catch((err) => {
-    console.error("❌ Seed error:", err);
-    process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    runSeed().catch((err) => {
+        console.error("❌ Seed error:", err);
+        process.exitCode = 1;
+    });
+}

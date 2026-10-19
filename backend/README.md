@@ -32,6 +32,7 @@ npm install
 DATABASE_URL=your_postgres_connection_string
 PORT=8000
 HOST=0.0.0.0
+CORS_ORIGIN=https://your-frontend.example.com
 ```
 
 3. Start the server:
@@ -80,3 +81,6 @@ Example subscribe message:
 
 - Match status is based on the start and end time.
 - Real-time match and commentary updates are broadcast to connected clients.
+- Use `/health` as the deployment health-check endpoint.
+- Set `CORS_ORIGIN` to the exact deployed frontend origin. Multiple origins may
+  be separated by commas.

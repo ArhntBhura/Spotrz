@@ -16,12 +16,23 @@ npm run dev
 
 ## How it talks to the backend
 
-The backend has no CORS, so the Vite dev server proxies everything:
+In development, the Vite dev server proxies everything:
 
 - `/api/*` → `http://localhost:8000/*` (REST)
 - `/ws` → `ws://localhost:8000/ws` (WebSocket)
 
 Point it at a different backend with `BACKEND_URL=http://host:port npm run dev`.
+
+For a production frontend deployed on a different origin, copy `.env.example`
+to `.env.production` and set both values to the deployed backend:
+
+```env
+VITE_API_BASE=https://api.example.com
+VITE_WS_URL=wss://api.example.com/ws
+```
+
+These values are embedded at build time, so set them before running
+`npm run build`.
 
 ## Structure
 

@@ -12,11 +12,11 @@ A full-stack demo that streams live match data to the browser. The backend store
 
 ## Tech stack
 
-| Layer    | Tools                                              |
-|----------|----------------------------------------------------|
-| Backend  | Node.js, Express 5, WebSocket (`ws`), Zod          |
-| Database | PostgreSQL, Drizzle ORM + Drizzle Kit              |
-| Frontend | React, Vite, Tailwind CSS                          |
+| Layer    | Tools                                     |
+| -------- | ----------------------------------------- |
+| Backend  | Node.js, Express 5, WebSocket (`ws`), Zod |
+| Database | PostgreSQL, Drizzle ORM + Drizzle Kit     |
+| Frontend | React, Vite, Tailwind CSS                 |
 
 ## Project structure
 
@@ -55,7 +55,7 @@ SportsDashboard/
             ─────── { type: "subscribe", matchId } ──▶
 ```
 
-When you click **Watch Live**, the frontend loads the latest commentary over REST, then subscribes to that match on the WebSocket so new entries arrive instantly. The backend doesn't send CORS headers, so in development the Vite dev server proxies `/api` and `/ws` to `http://localhost:8000`.
+When you click **Watch Live**, the frontend loads the latest commentary over REST, then subscribes to that match on the WebSocket so new entries arrive instantly. In development the Vite dev server proxies `/api` and `/ws` to `http://localhost:8000`; in production, configure the frontend backend URLs and the backend's allowed CORS origin.
 
 ## Getting started
 
@@ -127,25 +127,25 @@ Matches pop into the dashboard every few seconds, and commentary streams in once
 
 ## Scripts
 
-| Where     | Command               | What it does                               |
-|-----------|-----------------------|--------------------------------------------|
-| backend   | `npm run dev`         | Start the API in watch mode                |
-| backend   | `npm start`           | Start the API                              |
-| backend   | `npm run db:generate` | Generate migrations from the schema        |
-| backend   | `npm run db:migrate`  | Apply migrations to the database           |
-| backend   | `npm run db:studio`   | Open Drizzle Studio                        |
-| backend   | `npm run seed`        | Stream demo matches + commentary           |
-| frontend  | `npm run dev`         | Start the dashboard on port 5173           |
-| frontend  | `npm run build`       | Production build into `frontend/dist`      |
+| Where    | Command               | What it does                          |
+| -------- | --------------------- | ------------------------------------- |
+| backend  | `npm run dev`         | Start the API in watch mode           |
+| backend  | `npm start`           | Start the API                         |
+| backend  | `npm run db:generate` | Generate migrations from the schema   |
+| backend  | `npm run db:migrate`  | Apply migrations to the database      |
+| backend  | `npm run db:studio`   | Open Drizzle Studio                   |
+| backend  | `npm run seed`        | Stream demo matches + commentary      |
+| frontend | `npm run dev`         | Start the dashboard on port 5173      |
+| frontend | `npm run build`       | Production build into `frontend/dist` |
 
 ## API reference
 
-| Method | Endpoint                           | Description                                   |
-|--------|------------------------------------|-----------------------------------------------|
-| GET    | `/matches?limit=50`                | List matches, newest first (max 100)          |
-| POST   | `/matches`                         | Create a match — broadcasts `match_created`   |
-| GET    | `/matches/:id/commentary?limit=10` | Latest commentary for a match (max 100)       |
-| POST   | `/matches/:id/commentary`          | Add commentary — broadcasts `commentary`      |
+| Method | Endpoint                           | Description                                 |
+| ------ | ---------------------------------- | ------------------------------------------- |
+| GET    | `/matches?limit=50`                | List matches, newest first (max 100)        |
+| POST   | `/matches`                         | Create a match — broadcasts `match_created` |
+| GET    | `/matches/:id/commentary?limit=10` | Latest commentary for a match (max 100)     |
+| POST   | `/matches/:id/commentary`          | Add commentary — broadcasts `commentary`    |
 
 **WebSocket** — connect to `/ws`, then:
 
@@ -158,17 +158,20 @@ Server messages: `welcome`, `subscribed`, `unsubscribed`, `match_created`, `comm
 
 ## Environment variables (backend)
 
-| Variable                      | Default                 | Purpose                                      |
-|-------------------------------|-------------------------|----------------------------------------------|
-| `DATABASE_URL`                | —                       | PostgreSQL connection string (required)      |
-| `PORT`                        | `8000`                  | API port                                     |
-| `HOST`                        | `0.0.0.0`               | API host                                     |
-| `API_URL`                     | —                       | Base URL the seed script calls (required for seeding) |
-| `DELAY_MS`                    | `250`                   | Delay between seeded commentary entries      |
-| `SEED_MATCH_DURATION_MINUTES` | `120`                   | Length of seeded matches                     |
-| `SEED_FORCE_LIVE`             | `1`                     | Shift seeded matches so they're live now     |
+| Variable                      | Default   | Purpose                                               |
+| ----------------------------- | --------- | ----------------------------------------------------- |
+| `DATABASE_URL`                | —         | PostgreSQL connection string (required)               |
+| `PORT`                        | `8000`    | API port                                              |
+| `HOST`                        | `0.0.0.0` | API host                                              |
+| `CORS_ORIGIN`                 | —         | Comma-separated frontend origins allowed to call API  |
+| `API_URL`                     | —         | Base URL the seed script calls (required for seeding) |
+| `DELAY_MS`                    | `250`     | Delay between seeded commentary entries               |
+| `SEED_MATCH_DURATION_MINUTES` | `120`     | Length of seeded matches                              |
+| `SEED_FORCE_LIVE`             | `1`       | Shift seeded matches so they're live now              |
 
-The frontend reads `BACKEND_URL` (default `http://localhost:8000`) to choose where the dev proxy points.
+The frontend reads `BACKEND_URL` (default `http://localhost:8000`) for the
+development proxy. For production builds, set `VITE_API_BASE` to the backend
+HTTPS URL and `VITE_WS_URL` to its `wss://.../ws` URL before `npm run build`.
 
 ## Known limitations
 

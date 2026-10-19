@@ -2,6 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 function socketUrl() {
   if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL
+
+  if (import.meta.env.VITE_API_BASE) {
+    const apiUrl = new URL(import.meta.env.VITE_API_BASE)
+    apiUrl.protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:'
+    apiUrl.pathname = `${apiUrl.pathname.replace(/\/$/, '')}/ws`
+    return apiUrl.toString()
+  }
+
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
   return `${protocol}://${window.location.host}/ws`
 }
@@ -61,6 +69,10 @@ export function useLiveSocket({ onMessage, onReconnect }) {
           return
         }
         handlersRef.current.onMessage?.(message)
+      })
+
+      socket.addEventListener('error', (event) => {
+        console.error(`WebSocket connection failed: ${socket.url}`, event)
       })
 
       socket.addEventListener('close', () => {

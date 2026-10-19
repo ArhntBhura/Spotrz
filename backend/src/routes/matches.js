@@ -3,7 +3,9 @@ import {createMatchSchema, listMatchesQuerySchema} from "../validation/matches.j
 import {matches} from "../db/schema.js";
 import {db} from "../db/db.js";
 import {getMatchStatus} from "../utils/match-status.js";
-import {desc} from "drizzle-orm";
+import {MATCH_STATUS, matchIdParamSchema, updateScoreSchema} from "../validation/matches.js";
+import {syncMatchStatus} from "../utils/match-status.js";
+import {desc, eq} from "drizzle-orm";
 
 export const matchRouter = Router();
 
@@ -115,6 +117,7 @@ matchRouter.patch('/:id/score', async (req, res) => {
 
         if (res.app.locals.broadcastScoreUpdate) {
             res.app.locals.broadcastScoreUpdate(matchId, {
+                type: 'score_updated',
                 homeScore: updated.homeScore,
                 awayScore: updated.awayScore,
             });

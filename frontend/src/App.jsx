@@ -63,6 +63,20 @@ export default function App() {
     if (message.type === 'commentary' && message.data?.matchId === selectedIdRef.current) {
       setCommentary((current) => mergeById(current, [message.data], MAX_COMMENTARY))
     }
+
+    if (message.type === 'score_updated' && message.data?.matchId != null) {
+      setMatches((current) =>
+        current.map((match) =>
+          match.id === message.data.matchId
+            ? {
+                ...match,
+                homeScore: message.data.homeScore,
+                awayScore: message.data.awayScore,
+              }
+            : match,
+        ),
+      )
+    }
   }, [])
 
   // After a dropped connection, catch up on anything broadcast while offline.
